@@ -8,6 +8,12 @@
 #include "Enrollment.h"
 #include "PasswordHashing.h"
 
+/*
+ * Enrollment class used to implement the functionality of enrolling a new user into the system 
+ * Provides functionaity to validate a username, password and role in accordance with predefined 
+ * Restrictions 
+ */
+
 static bool verifyUsername(char *userName);
 static bool verifyPassword(char *password, char *userName);
 static bool verifyRole(char *role);
@@ -34,6 +40,9 @@ const int MAX_ENROLL_INPUT_LENGTH = 25;
 
 int num_common_passwords = 14;
 
+/*
+ * Metod used to prompt user to enter required details to enroll a new user 
+ */
 void enrollUser() {
     
     char userName[MAX_ENROLL_INPUT_LENGTH];
@@ -82,7 +91,9 @@ void enrollUser() {
             clearBuffer();
         }
 
-        passwordValid = verifyPassword(password, userName);
+        // Ensures that the password follows required format
+        // Prompt for new password if the entry is not valid
+        passwordValid = verifyPassword(password, userName); 
 
     } while(!passwordValid);
 
@@ -102,15 +113,24 @@ void enrollUser() {
             clearBuffer();
         }
 
+        // Validate that the role that is entered follows format
         roleValid = verifyRole(userRole);
 
     } while(!roleValid);
 
     printf("\nCreating new user...\n");
 
+    // Persist the new user
     saveNewUser(userName, password, userRole);
 }
 
+/*
+ * Method used to enforce requirements on the username
+ * Restrictions include: 
+ *      - username not > 20 character;
+ *      - username not < 1 character;
+ *      - username does not already exist.
+ */
 static bool verifyUsername(char *userName) {
     if(strlen(userName) > 20) {
         printf("Your Username is to long, Please enter a name up to a maxiumum of 20 characters\n");
@@ -128,6 +148,19 @@ static bool verifyUsername(char *userName) {
     return true;
 }
 
+/*
+ * Method used to enforce requirements on the password
+ * Restrictions include: 
+ *      - password not < 8 characters, and not > 12 characters
+ *      - password contains:    
+ *          - at least one uppercase letter
+ *          - at least one lowercase letter
+ *          - at least one numerical value
+ *          - at least one special character
+ *      - password does not match username
+ *      - password is not a member of the common passwords list 
+ *      - password is not a common format
+ */
 static bool verifyPassword(char *password, char *userName) {
     // Check password length
     if(strlen(password) > 12 || strlen(password) < 8) {
@@ -185,10 +218,15 @@ static bool verifyPassword(char *password, char *userName) {
     return true;
 }
 
+
+/*
+ * Method used to enforce requirements on the role
+ * A role must match, word for word and case sensitive,
+ * To a value within the validRoles list 
+ */
 static bool verifyRole(char *role) {
-
     bool valid = false;
-
+    // User entered the 'help' command
     if(strcmp(role, "help") == 0) {
         printf("Possible roles: \n"
         "\tClient, Premium Client, Employee, Financial Planner\n"
@@ -198,6 +236,7 @@ static bool verifyRole(char *role) {
         return valid;
     }
 
+    // Check if the role entered is a member of the validRoles list
     for(int i =0; i < NUM_ROLES; i++) {
         if(strcmp(role, validRoles[i]) == 0) valid = true;
     }
@@ -207,6 +246,10 @@ static bool verifyRole(char *role) {
     return valid;
 }
 
+/*
+ * Helper method used to check if a password is a member 
+ * Of the common passwords list
+ */
 static bool checkCommonPasswords(char *password) {
     for(int i = 0; i < num_common_passwords; i++) {
         if(strcmp(password, commonPasswords[i]) == 0) {
@@ -216,6 +259,10 @@ static bool checkCommonPasswords(char *password) {
     return true;
 }
 
+/*
+ * Helper method used to check if a password follows 
+ * A common number format
+ */
 static bool checkNumberFormat(char *password) {
     const char *datePattern = "^(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])(19|20)[0-9]{2}$"; // Example: 12312023
     const char *licensePlatePattern = "^[A-Z0-9]{1,7}$"; // Example: ABC1234
@@ -223,7 +270,9 @@ static bool checkNumberFormat(char *password) {
 
     regex_t reegex;
 
+    // Create Regex expression for Date Pattern
     if(regcomp(&reegex, datePattern, REG_EXTENDED) == 0) {
+        // If the password matches the expression
         if(regexec(&reegex, password, 0, NULL, 0) == 0) {
             return false;
         }
@@ -243,16 +292,28 @@ static bool checkNumberFormat(char *password) {
     return true;
 }
 
+
+/*
+ * Helper method used to convert a string to lowercase
+ * Does not modify the passed in list
+ * Returns a copy of the original list in lowercase
+ */
 static char* toLowerCase(char *str) {
+    // Allocate memory for new list
     char *lowercaseString = malloc(strlen(str));
 
+    // Iterate over the elements in the list, converting them to lowercase
     for(int i = 0; i < strlen(str); i ++) {
         lowercaseString[i] = tolower(str[i]);
     }
     
+    // Return new list
     return lowercaseString;
 }
 
+/*
+ * Method used to add a new password to the list of common passwords
+ */
 void addCommonPassword(char *password) {
     if(num_common_passwords < MAX_NUM_COMMON_PASSWORDS) {
         commonPasswords[num_common_passwords] = password;
@@ -262,6 +323,10 @@ void addCommonPassword(char *password) {
         printf("Cannot add any more passwords\n");
     }
 } 
+
+/*
+ * Helper method to clear out stdin after fgets()
+ */
 void clearBuffer() {
     int c;
     while((c = getchar()) != '\n' && c != EOF && c != '\0');

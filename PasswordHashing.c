@@ -7,6 +7,11 @@
 
 #include "PasswordHashing.h"
 
+/*
+ * PasswordHashing class used to provide the implementation to generate hash, 
+ * save information to passwd.txt, and retrieve information from passwd.txt  
+ */
+
 const char *PASSWD_FILE = "passwd.txt";
 const char *SEPARATOR = ":";
 
@@ -16,6 +21,10 @@ static void saveToHashFile(char* userName, char *salt, unsigned char *saltedPass
 static void getFromHashFile(char* userName, userInfo *user);
 static bool comparePasswordWithHash(char *password, userInfo *user);
 
+/*
+ * Method used to save a new user into the system. Outlines and controls the flow of the program when 
+ * Creating a new user
+ */
 void saveNewUser(char *userName, char *password, char *role) {
     // SHA256 generates hash of 256 bits, which converted to hex can be represented by 64 hex characters
     // hex = 4 bits, 256 / 4 = 64. a character is 8 bits, so 2 hex values, ie 32 chars to represent 256 bits
@@ -23,15 +32,22 @@ void saveNewUser(char *userName, char *password, char *role) {
 	// Set the maximum size Message Digest size for SHA 256, which is 32 characters
     unsigned char saltedPasswordHash[EVP_MD_size(EVP_sha256())];
 
+    // Generate the salt 
     // 10 digits + null terminator
     char salt[11];
     generateSalt(salt);
 
+    // Generate the salted password hash using the password and salt
     generatePasswordHash(password, salt, saltedPasswordHash);
 
+    // Add new entry to passwd.txt, saving the username, salt, salted password hash and the user role
 	saveToHashFile(userName, salt, saltedPasswordHash, role);
 }
 
+/*
+ * Method used to generate a hash from the user's password and a pseudorandom salt 
+ * uses openssl/evp to initialize the message digest context for SHA 256. 
+ */
 static void generatePasswordHash(char *password, char *salt, unsigned char *saltedPasswordHash) {
     EVP_MD_CTX *mdctx;
     const EVP_MD *md;
@@ -41,11 +57,6 @@ static void generatePasswordHash(char *password, char *salt, unsigned char *salt
 
     int saltedPasswordSize = strlen(salt) + strlen(password) + 1;
     char saltedPassword[saltedPasswordSize];
-
-    if (saltedPassword == NULL) {
-        printf("Memory allocation failed.\n");
-        exit(1);
-    }
 
     if (snprintf(saltedPassword, saltedPasswordSize, "%s%s", salt, password) >= saltedPasswordSize) {
         printf("Error: Buffer overflow.\n");
@@ -87,6 +98,10 @@ static void generatePasswordHash(char *password, char *salt, unsigned char *salt
 	snprintf(saltedPasswordHash, md_len, "%s", md_value);
 }
 
+/*
+ * Method used to generate a pseudorandom salt value
+ * Generates a salt value in the range 000000001 - 999999999
+ */
 static void generateSalt(char *salt) {
     // set seed of the generator to the system clock
     srand(time(0));
@@ -98,6 +113,14 @@ static void generateSalt(char *salt) {
     sprintf(salt, "%010d", randomValue);
 }
 
+/*
+ * Method to provide the login functionality
+ * Retrieves client information from passwd.txt and save it to userInfo object
+ * Delegate comparePasswordWithHash method to determine if the hashes match 
+ * 
+ * returns userInfo object containing user info if vaidation is successful, 
+ * NULL otherwise
+ */
 userInfo* verifyLogin(char *userName, char *password) {
 
     userInfo *userinfo = malloc(sizeof(userInfo));
@@ -109,6 +132,12 @@ userInfo* verifyLogin(char *userName, char *password) {
     return NULL;
 }
 
+/*
+ * Method used to generate a hash value from a provided password, and then
+ * Compare the resultant value with a hash retrieved from passwd.txt
+ * 
+ * Returns true if the hashes are equal
+ */
 static bool comparePasswordWithHash(char *password, userInfo *user) {
     unsigned char saltedPasswordHash[EVP_MD_size(EVP_sha256())];
     char hash[EVP_MAX_MD_SIZE + 1]; // +1 for null terminator
@@ -130,6 +159,10 @@ static bool comparePasswordWithHash(char *password, userInfo *user) {
     return false;
 }
 
+/*
+ * Method used to save user into passwd.txt
+ * Persists the username, salt, salted password hash and the role
+ */
 static void saveToHashFile(char* userName, char *salt, unsigned char *saltedPasswordHash, char *role) {
 	FILE *fptr = fopen(PASSWD_FILE, "a");
 
@@ -149,6 +182,11 @@ static void saveToHashFile(char* userName, char *salt, unsigned char *saltedPass
 	fclose(fptr);
 }
 
+/*
+ * Method used to determine if a user exists in passwd.txt
+ * 
+ * Returns True if the user exists, false otherwise.
+ */
 bool checkUserExists(char *userName) {
     FILE *fptr = fopen(PASSWD_FILE, "r");
     char *token;
@@ -168,6 +206,10 @@ bool checkUserExists(char *userName) {
     return false;
 }
 
+/*
+ * Method to retrieve user info from an entry in passwd.txt,
+ * and parse it into a userInfo object 
+ */
 static void getFromHashFile(char* userName, userInfo *user) {
 	FILE *fptr = fopen(PASSWD_FILE, "r");
     char *token;
@@ -177,7 +219,9 @@ static void getFromHashFile(char* userName, userInfo *user) {
         return;
     }
 
-    char line[150];
+    // allocate space for the line 
+    char line[200];
+    
     while(fgets(line, sizeof(line), fptr) != NULL) {
         token = strtok(line, SEPARATOR);
 

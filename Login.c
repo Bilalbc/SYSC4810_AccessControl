@@ -8,6 +8,10 @@
 #include "AccessControl.h"
 #include "Login.h"
 
+/*
+ * Login class used to implement the functionality of logging a user into the system 
+ */
+
 const char *subjects[9] = {"Client", "Premium Client", "Employee", 
                             "Financial Planner", "Financial Advisor", "Investment Analyst", 
                             "Technical Support", "Teller", "Compliance Officer"
@@ -23,6 +27,14 @@ const char *objects[10] = {"Client Account Balance", "Client Investments Portfol
 const int NUM_OBJECTS = 10;
 const int MAX_LOGIN_INPUT_LENGTH = 50;
 
+
+/*
+ * Method to login to the system 
+ * Prompts the user to enter their information, and delegates
+ * The verification of the credentials to methods in PasswordHashing.c
+ * And Enrollment.c
+ */
+
 int loginUser() {
 
     char userName[MAX_LOGIN_INPUT_LENGTH];
@@ -34,6 +46,7 @@ int loginUser() {
 
     userInfo *user;
     
+    // Prompt the user to enter their username
     do {
         printf("User Name:\t");
         fgets(userName, sizeof(userName), stdin);
@@ -45,13 +58,14 @@ int loginUser() {
             clearBuffer();
         }
 
-        if(checkUserExists(userName)) foundUser = true; 
+        if(checkUserExists(userName)) foundUser = true; // if the user exists, exit the loop
         else {
             printf("User %s could not be found\n", userName);
         }
 
     } while(!foundUser);
 
+    // Prompt the user to enter their password 
     do {
         printf("Password:\t");
         fgets(password, sizeof(password), stdin);
@@ -65,7 +79,7 @@ int loginUser() {
 
         user = verifyLogin(userName, password);
 
-        if(user != NULL) passwordCorrect = true;
+        if(user != NULL) passwordCorrect = true; // If information for the user was retrieved using the password 
         else {
             printf("Password was incorrect, please try again\n");
         }
@@ -75,12 +89,14 @@ int loginUser() {
     printf("\n\nLogin successful. Logged in as user %s\n", userName);
     printf("Your role is: %s\n", user->gid);
 
-    
+    // Display Privileges based on user role    
     printf("Your have the following access privileges (object : privilege): \n\n\n");
 
+    // Retrieve privilges from access control matrix
     const char **privileges = getAccountPrivilege(user->gid);
 
     if (privileges != NULL) {
+        // Iteratae over all the objects to map the privilege to the object
         for(int i = 0; i < NUM_OBJECTS; i++) {
             printf("%s : %s\n", objects[i], privileges[i]);
         }

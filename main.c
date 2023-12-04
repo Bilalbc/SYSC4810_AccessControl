@@ -7,8 +7,16 @@
 #include "Enrollment.h"
 #include "Login.h"
 
+/*
+ * Main class used to execute the prototype
+ */
+
 const int MAX_RESPONSE_LENGTH = 10; 
 
+/*
+ * Main method to begin the prototype. 
+ * prompts the user to enroll a new user or login with an existing user
+ */
 void main(int argc, char *argv[]) {
 
     printf("\n\nFinvest Holdings\n");

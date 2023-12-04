@@ -4,6 +4,11 @@
 
 #include "AccessControl.h"
 
+/*
+ * AccessControl class used to provide the access control matrix and the
+ * And functionality to retrieve the list of permissions for a given role
+ */
+
 const char *matrix[9][10] = { 
 	{"R", "R", "RW", "R", "-", "-", "-", "-", "-", "RX"} ,
  	{"R", "RW", "RW", "R", "R", "-", "-", "-", "-", "RX"} ,
@@ -16,6 +21,10 @@ const char *matrix[9][10] = {
 	{"R", "RX", "-", "-", "-", "-", "-", "-", "-", "RX"} ,
 };
 
+/*
+ * Method to allow for retrival of role permissions from access control matrix
+ * Given a role
+ */
 const char** getAccountPrivilege(char *accountType) {
 	
     accountType[strcspn(accountType, "\n")] = 0; // remove newline character from input
