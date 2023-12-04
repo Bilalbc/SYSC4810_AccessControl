@@ -15,7 +15,7 @@ static char* toLowerCase(char *str);
 static bool checkCommonPasswords(char *password);
 static bool checkNumberFormat(char *password);
 
-const char *commonPasswords[14] = { 
+const char *commonPasswords[50] = { 
     "P@ssw0rd", "Pass@123", "Admin@123", "Demo@123", 
     "Aa123456@", "Abcd@1234", "Password@123", "Abcd@123",
     "Welcome@123", "Pass@1234", "India@123", "Kumar@123",
@@ -28,9 +28,11 @@ const char *validRoles[9] = {
     "Teller", "Compliance Officer"
 };
 
-const int NUM_COMMON_PASSWORDS = 14;
+const int MAX_NUM_COMMON_PASSWORDS = 50;
 const int NUM_ROLES = 9;
 const int MAX_ENROLL_INPUT_LENGTH = 25;
+
+int num_common_passwords = 14;
 
 void enrollUser() {
     
@@ -206,7 +208,7 @@ static bool verifyRole(char *role) {
 }
 
 static bool checkCommonPasswords(char *password) {
-    for(int i = 0; i < NUM_COMMON_PASSWORDS; i++) {
+    for(int i = 0; i < num_common_passwords; i++) {
         if(strcmp(password, commonPasswords[i]) == 0) {
             return false;
         }
@@ -251,6 +253,15 @@ static char* toLowerCase(char *str) {
     return lowercaseString;
 }
 
+void addCommonPassword(char *password) {
+    if(num_common_passwords < MAX_NUM_COMMON_PASSWORDS) {
+        commonPasswords[num_common_passwords] = password;
+        num_common_passwords++;
+
+    } else {
+        printf("Cannot add any more passwords\n");
+    }
+} 
 void clearBuffer() {
     int c;
     while((c = getchar()) != '\n' && c != EOF && c != '\0');

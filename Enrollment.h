@@ -3,5 +3,6 @@
 
 void enrollUser();
 void clearBuffer();
+void addCommonPassword(char *password);
 
 #endif
