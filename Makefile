@@ -1,10 +1,10 @@
-main: main.o passwordHashing.o Enrollment.o Login.o accessControl.o
-	gcc -o main main.o Enrollment.o passwordHashing.o Login.o accessControl.o -lssl -lcrypto
+main: main.o PasswordHashing.o Enrollment.o Login.o AccessControl.o
+	gcc -o main main.o Enrollment.o PasswordHashing.o Login.o AccessControl.o -lssl -lcrypto
 
-passwordHashing.o: passwordHashing.c passwordHashing.h
-	gcc -c passwordHashing.c -o passwordHashing.o -lssl -lcrypto
+PasswordHashing.o: PasswordHashing.c PasswordHashing.h
+	gcc -c PasswordHashing.c -o PasswordHashing.o -lssl -lcrypto
 
-main.o: main.c passwordHashing.h Enrollment.h
+main.o: main.c PasswordHashing.h Enrollment.h
 	gcc -c main.c -o main.o
 
 Enrollment.o: Enrollment.c Enrollment.h
@@ -13,5 +13,5 @@ Enrollment.o: Enrollment.c Enrollment.h
 Login.o: Login.c Login.h
 	gcc -c Login.c -o Login.o
 
-accessControl.o: accessControl.c accessControl.h
-	gcc -c accessControl.c accessControl.o
+AccessControl.o: AccessControl.c AccessControl.h
+	gcc -c AccessControl.c AccessControl.o

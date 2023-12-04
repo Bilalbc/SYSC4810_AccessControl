@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "accessControl.h"
+#include "AccessControl.h"
 
 const char *matrix[9][9] = { 
 	{"RW", "R", "RW", "R", "-", "-", "-", "-", "-" } ,

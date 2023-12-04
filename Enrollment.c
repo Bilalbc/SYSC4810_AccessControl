@@ -6,7 +6,7 @@
 #include <regex.h>
 
 #include "Enrollment.h"
-#include "passwordHashing.h"
+#include "PasswordHashing.h"
 
 static bool verifyPassword(char *password, char *userName);
 static bool verifyRole(char *role);
@@ -30,30 +30,44 @@ const char *validRoles[9] = {
 
 const int NUM_COMMON_PASSWORDS = 20;
 const int NUM_ROLES = 9;
+const int MAX_INPUT_LENGTH = 25;
 
 void enrollUser() {
     
-    char userName[25];
-    char password[25];
-    char userRole[25];
+    char userName[MAX_INPUT_LENGTH];
+    char password[MAX_INPUT_LENGTH];
+    char userRole[MAX_INPUT_LENGTH];
 
+    bool valid;
     // Get username
     printf("Please enter your user name\n");
 
     do {
+        valid = true;
+
         fgets(userName, sizeof(userName), stdin);
 
         userName[strcspn(userName, "\n")] = 0; // remove newline character from input
 
         if(strlen(userName) > 20) {
             printf("Your Username is to long, Please enter a name up to a maxiumum 20 characters\n");
+            valid = false;
+            clearBuffer();
             continue;
         } else if(strlen(userName) < 1) {
             printf("You must enter a username up to a maxiumum 20 characters\n");
+            valid = false;
+            clearBuffer();
             continue;
         }
 
-    } while(strlen(userName) > 20 || strlen(userName) < 1);
+        if(checkUserExists(userName)) {
+            printf("The username %s has already been registered. Please select another one.\n", userName);
+            valid = false;
+            continue;
+        }
+
+    } while(!valid);
 
     printf("\nYour Username will be: %s \n", userName);
 
@@ -75,6 +89,8 @@ void enrollUser() {
 
         passwordValid = verifyPassword(password, userName);
 
+        if(!passwordValid) clearBuffer();
+
     } while(!passwordValid);
 
     printf("\nYour password has been set to %s\n", password);
@@ -91,6 +107,8 @@ void enrollUser() {
         userRole[strcspn(userRole, "\n")] = 0; // remove newline character from input
 
         roleValid = verifyRole(userRole);
+
+        if(!roleValid) clearBuffer();
 
     } while(!roleValid);
 
@@ -191,7 +209,6 @@ static bool checkNumberFormat(char *password) {
             return false;
         }
     }
-
     return true;
 }
 
@@ -227,3 +244,8 @@ static char* toLowerCase(char *str) {
     return lowercaseString;
 }
 
+
+void clearBuffer() {
+    int c;
+    while((c = getchar()) != '\n' && c != EOF && c != '\0');
+}

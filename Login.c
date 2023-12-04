@@ -3,9 +3,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "passwordHashing.h"
-#include "accessControl.h"
+#include "Enrollment.h"
+#include "PasswordHashing.h"
+#include "AccessControl.h"
 #include "Login.h"
+
+const char *subjects[9] = {"Client", "Premium Client", "Employee", 
+                            "Financial Planner", "Financial Advisor", "Investment Analyst", 
+                            "Technical Support", "Teller", "Compliance Officer"
+                            };
+
+
+const char *objects[9] = {"Client Account Balance", "Client Investments Portfolio", "Client Information", 
+                            "Financial Advisor Details", "Investment Analyst Details", "Money Market Instruments",
+                             "Private consumer instruments", "Derivatives trading", "Interest instruments"
+                            };
+
+const int NUM_OBJECTS = 9;
 
 int loginUser() {
 
@@ -26,7 +40,10 @@ int loginUser() {
         userName[strcspn(userName, "\n")] = 0; // remove newline character from input
 
         if(checkUserExists(userName)) foundUser = true; 
-        else printf("User %s could not be found\n", userName);
+        else {
+            printf("User %s could not be found\n", userName);
+            clearBuffer();
+        }
 
     } while(!foundUser);
 
@@ -41,15 +58,18 @@ int loginUser() {
         user = verifyLogin(userName, password);
 
         if(user != NULL) passwordCorrect = true;
-        else printf("Password was incorrect, please try again\n");
+        else {
+            printf("Password was incorrect, please try again\n");
+            clearBuffer();
+        }
 
     } while(!passwordCorrect);
 
     printf("\n\n\nLogin successful. Logged in as user %s\n", userName);
-    printf("Your is role: %s", user->gid);
+    printf("Your is role: %s\n", user->gid);
 
     
-    printf("Your have the following access privileges (object : privilege): \n\n");
+    printf("Your have the following access privileges (object : privilege): \n\n\n");
 
     const char **privileges = getAccountPrivilege(user->gid);
 

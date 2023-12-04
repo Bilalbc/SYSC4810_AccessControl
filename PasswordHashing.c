@@ -5,7 +5,7 @@
 #include <string.h>
 #include <openssl/evp.h>
 
-#include "passwordHashing.h"
+#include "PasswordHashing.h"
 
 const char *PASSWD_FILE = "passwd.txt";
 const char *SEPARATOR = ":";
@@ -16,45 +16,6 @@ static void saveToHashFile(char* userName, char *salt, unsigned char *saltedPass
 static void getFromHashFile(char* userName, userInfo *user);
 static bool comparePasswordWithHash(char *password, userInfo *user);
 
-/*
-int main(int argc, char *argv[]) {
-	
-    if (argc != 2) {
-        printf("Usage: %s <password to encrypt>\n", argv[0]);
-        return -1;
-    }
-    printf("\nprovided password: %s\n", argv[1]);
-
-    // 5 digits + null terminator
-    char salt[6];
-    generateSalt(salt);
-
-    // SHA256 generates hash of 256 bits, which converted to hex can be represented by 64 hex characters
-    // hex = 4 bits, 256 / 4 = 64. a character is 8 bits, so 2 hex values, ie 32 chars to represent 256 bits
-
-	// Set the maximum size Message Digest size for SHA 256, which is 32 characters
-    unsigned char saltedPasswordHash[EVP_MD_size(EVP_sha256())];
-
-    generatePasswordHash(argv[1], salt, saltedPasswordHash);
-
-	for (int i = 0; i < 32; i++) 
-		printf("%02x", saltedPasswordHash[i]);
-	printf("\n");
-
-	char *userName = "poop";
-	char *role = "Premium Client";
-
-	saveToHashFile(userName, salt, saltedPasswordHash, role);
-
-    // allocate memory for the struct pointer
-    userInfo *info = malloc(sizeof(userInfo));
-    
-    getFromHashFile("poop", info);
-    free(info);
-
-	return 0;
-}
-*/
 void saveNewUser(char *userName, char *password, char *role) {
     // SHA256 generates hash of 256 bits, which converted to hex can be represented by 64 hex characters
     // hex = 4 bits, 256 / 4 = 64. a character is 8 bits, so 2 hex values, ie 32 chars to represent 256 bits
@@ -96,8 +57,6 @@ static void generatePasswordHash(char *password, char *salt, unsigned char *salt
         free(saltedPassword);  // Free allocated memory
         exit(1);
     }
-
-    // printf("\n\nsalted password: %s, size: %ld\n", saltedPassword, strlen(saltedPassword));
 
     md = EVP_get_digestbyname(digest_type);
     if (md == NULL) {

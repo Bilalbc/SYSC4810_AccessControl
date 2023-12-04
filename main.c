@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "Enrollment.h"
 #include "Login.h"
@@ -13,6 +14,7 @@ void main(int argc, char *argv[]) {
     printf("-------------------------------------------\n");
 
     char response[10];
+    bool valid = true;
 
     printf("Are you a new user (Enroll)? Please answer Y/N\n");
 
@@ -23,15 +25,18 @@ void main(int argc, char *argv[]) {
         response[0] = toupper(response[0]);
         
         if(strcmp(response, "Y") == 0) {
+            valid = true;
             enrollUser();
 
         } else if (strcmp(response, "N") == 0) {
+            valid = true;
             loginUser();
         
         } else {
+            valid = false;
             printf("Please enter either 'Y' or 'N'. \n");
         }
 
-    } while(strcmp(response, "Y") != 0 && strcmp(response, "N") != 0);
+    } while(!valid);
 
 }
