@@ -29,11 +29,6 @@ void saveNewUser(char *userName, char *password, char *role) {
 
     generatePasswordHash(password, salt, saltedPasswordHash);
 
-    /*
-	for (int i = 0; i < 32; i++) 
-		printf("%02x", saltedPasswordHash[i]);
-	printf("\n");
-    */
 	saveToHashFile(userName, salt, saltedPasswordHash, role);
 }
 
@@ -54,32 +49,36 @@ static void generatePasswordHash(char *password, char *salt, unsigned char *salt
 
     if (snprintf(saltedPassword, saltedPasswordSize, "%s%s", salt, password) >= saltedPasswordSize) {
         printf("Error: Buffer overflow.\n");
-        free(saltedPassword);  // Free allocated memory
+        free(saltedPassword);
         exit(1);
     }
 
+    // Get the digest object for SHA 256
     md = EVP_get_digestbyname(digest_type);
     if (md == NULL) {
         printf("Unknown message digest %s\n", password);
         exit(1);
     }
 
+    // Allocate a digest context for SHA 256
     mdctx = EVP_MD_CTX_new();
     if (!mdctx || !EVP_DigestInit_ex(mdctx, md, NULL)) {
         printf("Message digest initialization failed.\n");
-        free(saltedPassword);  // Free allocated memory
+        free(saltedPassword); 
         exit(1);
     }
 
+    // Hash the provided salted password in the digest context
     if (!EVP_DigestUpdate(mdctx, saltedPassword, strlen(saltedPassword))) {
         printf("Message digest update failed.\n");
-        free(saltedPassword);  // Free allocated memory
+        free(saltedPassword); 
         exit(1);
     }
 
+    // Retrieve the digest value from the contxt, and store in md_value
     if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len)) {
         printf("Message digest finalization failed.\n");
-        free(saltedPassword);  // Free allocated memory
+        free(saltedPassword);
         exit(1);
     }
 
@@ -178,7 +177,7 @@ static void getFromHashFile(char* userName, userInfo *user) {
         return;
     }
 
-    char line[100];
+    char line[150];
     while(fgets(line, sizeof(line), fptr) != NULL) {
         token = strtok(line, SEPARATOR);
 

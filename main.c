@@ -9,7 +9,7 @@
 
 void main(int argc, char *argv[]) {
 
-    printf("Finvest Holdings\n");
+    printf("\n\nFinvest Holdings\n");
     printf("Client Holdings and Information System\n");
     printf("-------------------------------------------\n");
 

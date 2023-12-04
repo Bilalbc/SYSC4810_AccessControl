@@ -69,11 +69,8 @@ void enrollUser() {
 
     } while(!valid);
 
-    printf("\nYour Username will be: %s \n", userName);
-
-
     // Get password
-    printf("Please enter your password\n");
+    printf("Please enter a password\n");
     printf("A password must: \n\tBe 8-12 characters in length\n"
         "\tHave one upper-case letter\n"
         "\tHave one lower-case letter\n"
@@ -93,14 +90,11 @@ void enrollUser() {
 
     } while(!passwordValid);
 
-    printf("\nYour password has been set to %s\n", password);
-
-
     // get role
     bool roleValid = false;
 
     do {
-        printf("Please enter your role (type 'help' (case sensitive) for a list of roles)\n");
+        printf("Please enter your role (case sensitive) (type 'help' for a list of roles)\n");
         
         fgets(userRole, sizeof(userRole), stdin);
 
@@ -111,9 +105,6 @@ void enrollUser() {
         if(!roleValid) clearBuffer();
 
     } while(!roleValid);
-
-    printf("\nYour role has been set to %s\n", userRole);
-
 
     printf("Saving your user credentials\n");
 

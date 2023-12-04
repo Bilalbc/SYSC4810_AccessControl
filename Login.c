@@ -14,25 +14,26 @@ const char *subjects[9] = {"Client", "Premium Client", "Employee",
                             };
 
 
-const char *objects[9] = {"Client Account Balance", "Client Investments Portfolio", "Client Information", 
+const char *objects[10] = {"Client Account Balance", "Client Investments Portfolio", "Client Information", 
                             "Financial Advisor Details", "Investment Analyst Details", "Money Market Instruments",
-                             "Private consumer instruments", "Derivatives trading", "Interest instruments"
+                             "Private consumer instruments", "Derivatives trading", "Interest instruments", 
+                             "System Access (Outside of 0900 - 1700)"
                             };
 
-const int NUM_OBJECTS = 9;
+const int NUM_OBJECTS = 10;
 
 int loginUser() {
 
     char userName[25];
     char password[25];
-    char userRole[25];
+    char userRole[50];
 
     bool foundUser = false;
     bool passwordCorrect = false;
 
     userInfo *user;
 
-    printf("Please enter your user name\n");
+    printf("User Name: \t");
 
     do {
         fgets(userName, sizeof(userName), stdin);
@@ -48,7 +49,7 @@ int loginUser() {
     } while(!foundUser);
 
 
-    printf("Please enter the password for %s\n", userName);
+    printf("Password:\t");
 
     do {
         fgets(password, sizeof(password), stdin);
@@ -65,8 +66,8 @@ int loginUser() {
 
     } while(!passwordCorrect);
 
-    printf("\n\n\nLogin successful. Logged in as user %s\n", userName);
-    printf("Your is role: %s\n", user->gid);
+    printf("\n\nLogin successful. Logged in as user %s\n", userName);
+    printf("Your role is: %s\n", user->gid);
 
     
     printf("Your have the following access privileges (object : privilege): \n\n\n");
