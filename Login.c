@@ -21,47 +21,53 @@ const char *objects[10] = {"Client Account Balance", "Client Investments Portfol
                             };
 
 const int NUM_OBJECTS = 10;
+const int MAX_LOGIN_INPUT_LENGTH = 50;
 
 int loginUser() {
 
-    char userName[25];
-    char password[25];
-    char userRole[50];
+    char userName[MAX_LOGIN_INPUT_LENGTH];
+    char password[MAX_LOGIN_INPUT_LENGTH];
+    char userRole[MAX_LOGIN_INPUT_LENGTH];
 
     bool foundUser = false;
     bool passwordCorrect = false;
 
     userInfo *user;
-
-    printf("User Name: \t");
-
+    
     do {
+        printf("User Name:\t");
         fgets(userName, sizeof(userName), stdin);
 
         userName[strcspn(userName, "\n")] = 0; // remove newline character from input
 
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(userName) == MAX_LOGIN_INPUT_LENGTH-1) {
+            clearBuffer();
+        }
+
         if(checkUserExists(userName)) foundUser = true; 
         else {
             printf("User %s could not be found\n", userName);
-            clearBuffer();
         }
 
     } while(!foundUser);
 
-
-    printf("Password:\t");
-
     do {
+        printf("Password:\t");
         fgets(password, sizeof(password), stdin);
 
         password[strcspn(password, "\n")] = 0; // remove newline character from input
+
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(password) == MAX_LOGIN_INPUT_LENGTH-1) {
+            clearBuffer();
+        }
 
         user = verifyLogin(userName, password);
 
         if(user != NULL) passwordCorrect = true;
         else {
             printf("Password was incorrect, please try again\n");
-            clearBuffer();
         }
 
     } while(!passwordCorrect);

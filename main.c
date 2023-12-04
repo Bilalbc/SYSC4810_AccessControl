@@ -7,13 +7,15 @@
 #include "Enrollment.h"
 #include "Login.h"
 
+const int MAX_RESPONSE_LENGTH = 10; 
+
 void main(int argc, char *argv[]) {
 
     printf("\n\nFinvest Holdings\n");
     printf("Client Holdings and Information System\n");
     printf("-------------------------------------------\n");
 
-    char response[10];
+    char response[MAX_RESPONSE_LENGTH];
     bool valid = true;
 
     printf("Are you a new user (Enroll)? Please answer Y/N\n");
@@ -23,7 +25,12 @@ void main(int argc, char *argv[]) {
 
         response[strcspn(response, "\n")] = 0; // remove newline character from input
         response[0] = toupper(response[0]);
-        
+
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(response) == MAX_RESPONSE_LENGTH-1) {
+            clearBuffer();
+        }
+
         if(strcmp(response, "Y") == 0) {
             valid = true;
             enrollUser();

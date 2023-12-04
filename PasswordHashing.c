@@ -23,8 +23,8 @@ void saveNewUser(char *userName, char *password, char *role) {
 	// Set the maximum size Message Digest size for SHA 256, which is 32 characters
     unsigned char saltedPasswordHash[EVP_MD_size(EVP_sha256())];
 
-    // 5 digits + null terminator
-    char salt[6];
+    // 10 digits + null terminator
+    char salt[11];
     generateSalt(salt);
 
     generatePasswordHash(password, salt, saltedPasswordHash);
@@ -91,11 +91,11 @@ static void generateSalt(char *salt) {
     // set seed of the generator to the system clock
     srand(time(0));
 
-    // rand() generates the random number based on the seed, and %99999
+    // rand() generates the random number based on the seed, and % 9999999999
     // determines the range of values
-    int randomValue = (rand() % 99999);
+    int randomValue = (rand() % 9999999999);
 
-    sprintf(salt, "%05d", randomValue);
+    sprintf(salt, "%010d", randomValue);
 }
 
 userInfo* verifyLogin(char *userName, char *password) {

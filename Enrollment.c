@@ -8,18 +8,18 @@
 #include "Enrollment.h"
 #include "PasswordHashing.h"
 
+static bool verifyUsername(char *userName);
 static bool verifyPassword(char *password, char *userName);
 static bool verifyRole(char *role);
 static char* toLowerCase(char *str);
 static bool checkCommonPasswords(char *password);
 static bool checkNumberFormat(char *password);
 
-const char *commonPasswords[20] = { 
-    "123456", "admin", "12345678", "123456789", 
-    "1234", "12345", "password", "123",
-    "Aa123456", "1234567890", "UNKNOWN", "1234567",
-    "123123", "111111", "Password", "12345678910",
-    "000000", "admin123", "********", "user"
+const char *commonPasswords[14] = { 
+    "P@ssw0rd", "Pass@123", "Admin@123", "Demo@123", 
+    "Aa123456@", "Abcd@1234", "Password@123", "Abcd@123",
+    "Welcome@123", "Pass@1234", "India@123", "Kumar@123",
+    "Test@123", "Abc@1234"
 };
 
 const char *validRoles[9] = {
@@ -28,49 +28,39 @@ const char *validRoles[9] = {
     "Teller", "Compliance Officer"
 };
 
-const int NUM_COMMON_PASSWORDS = 20;
+const int NUM_COMMON_PASSWORDS = 14;
 const int NUM_ROLES = 9;
-const int MAX_INPUT_LENGTH = 25;
+const int MAX_ENROLL_INPUT_LENGTH = 25;
 
 void enrollUser() {
     
-    char userName[MAX_INPUT_LENGTH];
-    char password[MAX_INPUT_LENGTH];
-    char userRole[MAX_INPUT_LENGTH];
+    char userName[MAX_ENROLL_INPUT_LENGTH];
+    char password[MAX_ENROLL_INPUT_LENGTH];
+    char userRole[MAX_ENROLL_INPUT_LENGTH];
 
-    bool valid;
+    bool userNameValid = false;
+
     // Get username
-    printf("Please enter your user name\n");
-
     do {
-        valid = true;
+        printf("\nUsername:\t");
 
         fgets(userName, sizeof(userName), stdin);
 
         userName[strcspn(userName, "\n")] = 0; // remove newline character from input
 
-        if(strlen(userName) > 20) {
-            printf("Your Username is to long, Please enter a name up to a maxiumum 20 characters\n");
-            valid = false;
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(userName) == MAX_ENROLL_INPUT_LENGTH-1) {
             clearBuffer();
-            continue;
-        } else if(strlen(userName) < 1) {
-            printf("You must enter a username up to a maxiumum 20 characters\n");
-            valid = false;
-            clearBuffer();
-            continue;
         }
 
-        if(checkUserExists(userName)) {
-            printf("The username %s has already been registered. Please select another one.\n", userName);
-            valid = false;
-            continue;
-        }
+        userNameValid = verifyUsername(userName);
 
-    } while(!valid);
+    } while(!userNameValid);
+
+    printf("Username will be %s.\n", userName);
 
     // Get password
-    printf("Please enter a password\n");
+    printf("\nPlease enter a password\n");
     printf("A password must: \n\tBe 8-12 characters in length\n"
         "\tHave one upper-case letter\n"
         "\tHave one lower-case letter\n"
@@ -80,35 +70,60 @@ void enrollUser() {
     bool passwordValid = false;
 
     do {
+        printf("\nPassword:\t");
         fgets(password, sizeof(password), stdin);
 
         password[strcspn(password, "\n")] = 0; // remove newline character from input
 
-        passwordValid = verifyPassword(password, userName);
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(password) == MAX_ENROLL_INPUT_LENGTH-1) {
+            clearBuffer();
+        }
 
-        if(!passwordValid) clearBuffer();
+        passwordValid = verifyPassword(password, userName);
 
     } while(!passwordValid);
 
     // get role
     bool roleValid = false;
 
+    printf("\nPlease enter your role (case sensitive) (type 'help' for a list of roles)\n");
+
     do {
-        printf("Please enter your role (case sensitive) (type 'help' for a list of roles)\n");
-        
+        printf("\nRole:\t\t");
         fgets(userRole, sizeof(userRole), stdin);
 
         userRole[strcspn(userRole, "\n")] = 0; // remove newline character from input
 
-        roleValid = verifyRole(userRole);
+        // Bug fix for stdin not clearing if userinput is greater than buffer size (MAX_INPUT_LENGTH)
+        if(strlen(userRole) == MAX_ENROLL_INPUT_LENGTH-1) {
+            clearBuffer();
+        }
 
-        if(!roleValid) clearBuffer();
+        roleValid = verifyRole(userRole);
 
     } while(!roleValid);
 
-    printf("Saving your user credentials\n");
+    printf("\nCreating new user...\n");
 
     saveNewUser(userName, password, userRole);
+}
+
+static bool verifyUsername(char *userName) {
+    if(strlen(userName) > 20) {
+        printf("Your Username is to long, Please enter a name up to a maxiumum of 20 characters\n");
+        return false;
+
+    } else if(strlen(userName) < 1) {
+        printf("You must enter a username up to a maxiumum of 20 characters\n");
+        return false;
+    }
+
+    if(checkUserExists(userName)) {
+        printf("The username %s has already been registered. Please select another one.\n", userName);
+        return false;
+    }
+    return true;
 }
 
 static bool verifyPassword(char *password, char *userName) {
@@ -118,24 +133,15 @@ static bool verifyPassword(char *password, char *userName) {
         return false;
     }
 
-    // Check matching username 
-    if(strcmp(toLowerCase(password), toLowerCase(userName)) == 0) {
-        printf("Your password cannot match your username\n");
-        return false;
-    }
-
     // Check amount of uppercase, lowercase, numerical and special characters
     int num_upper = 0, num_lower = 0, num_numerical = 0, num_special = 0;
     const char *special_characters = "!@#$%%?*";
-
-    while(*password) {
-
-        if(isupper(*password)) num_upper++;
-        if(islower(*password)) num_lower++;
-        if(isdigit(*password)) num_numerical++;
-        if(strchr(special_characters, *password)) num_special++;
-        
-        password++;
+    
+    for(int i = 0; i < strlen(password); i++) {
+        if(isupper(password[i])) num_upper++;
+        if(islower(password[i])) num_lower++;
+        if(isdigit(password[i])) num_numerical++;
+        if(strchr(special_characters, password[i])) num_special++;
     }
 
     if(num_upper == 0) {
@@ -155,16 +161,48 @@ static bool verifyPassword(char *password, char *userName) {
         return false;
     }
 
+    // Check matching username 
+    if(strcmp(toLowerCase(password), toLowerCase(userName)) == 0) {
+        printf("Your password cannot match your username\n");
+        return false;
+    }
+
     // Check if the password is a common password
-    if(!checkCommonPasswords(password)) return false;
-    
+    if(!checkCommonPasswords(password)) {
+        printf("Your password is too common, please select another.\n");
+        return false;
+    }
+
     // Check if the password matches any common formats
     if(!checkNumberFormat(password)) {
-        printf("Your password must not match a date format (MMDDYYYY), license plate format (XXXNNNN), or a phone number format (NNNNNNNNNN)\n");
+        printf("Your password must not match a date format (MMDDYYYY), "
+                "license plate format (XXXNNNN), or a phone number format (NNNNNNNNNN)\n");
         return false;
     }
 
     return true;
+}
+
+static bool verifyRole(char *role) {
+
+    bool valid = false;
+
+    if(strcmp(role, "help") == 0) {
+        printf("Possible roles: \n"
+        "\tClient, Premium Client, Employee, Financial Planner\n"
+        "\tFinancial Advisor, Investment Analyst, Technical Support\n"
+        "\tTeller, Compliance Officer\n");
+
+        return valid;
+    }
+
+    for(int i =0; i < NUM_ROLES; i++) {
+        if(strcmp(role, validRoles[i]) == 0) valid = true;
+    }
+
+    if(valid == false) printf("Invalid role selction.\n");
+
+    return valid;
 }
 
 static bool checkCommonPasswords(char *password) {
@@ -203,28 +241,6 @@ static bool checkNumberFormat(char *password) {
     return true;
 }
 
-static bool verifyRole(char *role) {
-
-    bool valid = false;
-
-    if(strcmp(role, "help") == 0) {
-        printf("Possible roles: \n"
-        "\tClient, Premium Client, Employee, Financial Planner\n"
-        "\tFinancial Advisor, Investment Analyst, Technical Support\n"
-        "\tTeller, Compliance Officer\n");
-
-        return valid;
-    }
-
-    for(int i =0; i < NUM_ROLES; i++) {
-        if(strcmp(role, validRoles[i]) == 0) valid = true;
-    }
-
-    if(valid == false) printf("Invalid role selction.\n\n");
-
-    return valid;
-}
-
 static char* toLowerCase(char *str) {
     char *lowercaseString = malloc(strlen(str));
 
@@ -234,7 +250,6 @@ static char* toLowerCase(char *str) {
     
     return lowercaseString;
 }
-
 
 void clearBuffer() {
     int c;
