@@ -2,7 +2,7 @@
 Access control and user authentication program for SYSC 4810 - Network and Software Security
 
 Access control is implemented through Role Based Access Control (RBAC) to define distinct roles in the system and associate permissions with users. 
-Privieleges are assigned based on an Access Control Matrix, implemented in AccessControl.c and AccessControl.h.
+Privileges are assigned based on an Access Control Matrix, implemented in AccessControl.c and AccessControl.h.
 
 Program utilizes SHA 256 hashing algorithm to encrypt user passwords, and authenticate users on login.
 
